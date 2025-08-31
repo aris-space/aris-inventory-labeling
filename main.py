@@ -10,8 +10,6 @@ import os
 import tkinter as tk
 from tkinter import ttk, messagebox
 
-from pypdf import PdfReader, PdfWriter
-
 def generate_label(row):
     # Ensure output directory exists
     output_dir = "labels"
@@ -23,27 +21,30 @@ def generate_label(row):
 
     # Point QR code to the asset page
     qr_data = f"https://inventory.aris-space.ch/hardware/{asset_id}"
-    qr_img = qrcode.make(data=qr_data, error_correction=qrcode.ERROR_CORRECT_H)
+    qr_img = qrcode.make(data=qr_data, error_correction=qrcode.ERROR_CORRECT_H).rotate(90)
     qr_img_path = os.path.join(output_dir, f"{asset_tag}_qr.png")
     with open(qr_img_path, "wb") as file:
         qr_img.save(file)
 
     # Create PDF
-    width = 62 * mm
-    height = 29 * mm
+    width = 29 * mm
+    height = 62 * mm
     c = canvas.Canvas(pdf_path, pagesize=(width, height))
 
     # Draw QR code
-    qr_size = height - 5 * mm
-    c.drawImage(qr_img_path, 0, 5 * mm, qr_size, qr_size, preserveAspectRatio=True)
+    qr_size = width - 5 * mm
+    c.drawImage(qr_img_path, 0, 0, qr_size, qr_size, preserveAspectRatio=True)
 
+    # Write all text vertically
+    c.translate(width, 0)
+    c.rotate(90)
     c.setFont("Mono", 3.5 * mm)
     c.drawCentredString(qr_size / 2, 3 * mm, f"{asset_tag}")
 
     # Draw text fields
-    font_height = 3 * mm
+    font_height = 3.2 * mm
     text_x = qr_size
-    text_y = height - 2 * mm - font_height
+    text_y = width - 2 * mm - font_height
     c.setFont("Helvetica", font_height)
 
     fields = [
@@ -66,11 +67,6 @@ def generate_label(row):
 
     c.save()
     os.remove(qr_img_path)
-
-    reader = PdfReader(pdf_path)
-    writer = PdfWriter()
-    writer.add_page(reader.pages[0].rotate(-90))
-    writer.write(pdf_path)
 
     print(f"Generated {pdf_path}")
     return pdf_path
