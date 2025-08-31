@@ -1,2 +1,2 @@
 # aris-inventory-labeling
-Utilities to manage labeling of ARIS inventory assets.
+Utility to generate labels for the ARIS inventory system.
