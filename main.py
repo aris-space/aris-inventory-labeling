@@ -16,12 +16,14 @@ from tkinter import ttk, messagebox
 
 def generate_label(row, output_dir):
     asset_tag = row.get("Asset Tag")
-    asset_id = row.get('ID')
+    asset_id = row.get("ID")
     pdf_path = os.path.join(output_dir, f"{asset_tag}.pdf")
 
     # Point QR code to the asset page
     qr_data = f"https://inventory.aris-space.ch/hardware/{asset_id}"
-    qr_img = qrcode.make(data=qr_data, error_correction=qrcode.ERROR_CORRECT_H).rotate(90)
+    qr_img = qrcode.make(data=qr_data, error_correction=qrcode.ERROR_CORRECT_H).rotate(
+        90
+    )
     qr_img_path = os.path.join(output_dir, f"{asset_tag}_qr.png")
     with open(qr_img_path, "wb") as file:
         qr_img.save(file)
@@ -58,7 +60,7 @@ def generate_label(row, output_dir):
         text = f"{label}: {value}"
         lines = simpleSplit(text, "Helvetica", font_height, 36 * mm)
         for i, line in enumerate(lines):
-            if(i == 0):
+            if i == 0:
                 c.drawString(text_x, text_y, line)
             else:
                 c.drawString(text_x + 2 * mm, text_y, line)
@@ -86,7 +88,7 @@ def main():
 
     # Read CSV
     df = pd.read_csv("data.csv")
-    pdfmetrics.registerFont(TTFont('Mono', 'AtkinsonHyperlegibleMono-Regular.ttf'))
+    pdfmetrics.registerFont(TTFont("Mono", "AtkinsonHyperlegibleMono-Regular.ttf"))
 
     # GUI
     root = tk.Tk()
@@ -95,7 +97,9 @@ def main():
     tk.Label(root, text="Select Asset Tag:").pack(padx=10, pady=5)
     asset_tags = df["Asset Tag"].astype(str).tolist()
     selected = tk.StringVar()
-    dropdown = ttk.Combobox(root, textvariable=selected, values=asset_tags, state="readonly")
+    dropdown = ttk.Combobox(
+        root, textvariable=selected, values=asset_tags, state="readonly"
+    )
     dropdown.pack(padx=10, pady=5)
 
     def on_generate():
