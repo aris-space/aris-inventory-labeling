@@ -10,6 +10,8 @@ import os
 import tkinter as tk
 from tkinter import ttk, messagebox
 
+from pypdf import PdfReader, PdfWriter
+
 def generate_label(row):
     # Ensure output directory exists
     output_dir = "labels"
@@ -64,6 +66,12 @@ def generate_label(row):
 
     c.save()
     os.remove(qr_img_path)
+
+    reader = PdfReader(pdf_path)
+    writer = PdfWriter()
+    writer.add_page(reader.pages[0].rotate(-90))
+    writer.write(pdf_path)
+
     print(f"Generated {pdf_path}")
     return pdf_path
 
