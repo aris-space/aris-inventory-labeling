@@ -6,15 +6,15 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib.units import mm
 from reportlab.lib.utils import simpleSplit
+
+from pdf2image import convert_from_path
+
 import os
 import tkinter as tk
 from tkinter import ttk, messagebox
 
-def generate_label(row):
-    # Ensure output directory exists
-    output_dir = "labels"
-    os.makedirs(output_dir, exist_ok=True)
 
+def generate_label(row, output_dir):
     asset_tag = row.get("Asset Tag")
     asset_id = row.get('ID')
     pdf_path = os.path.join(output_dir, f"{asset_tag}.pdf")
@@ -71,7 +71,19 @@ def generate_label(row):
     print(f"Generated {pdf_path}")
     return pdf_path
 
+
+def pdf_to_png(pdf_path):
+    image = convert_from_path(pdf_path, dpi=300)
+    png_path = os.path.splitext(pdf_path)[0] + ".png"
+    image[0].save(png_path, "PNG")
+    print(f"Converted {pdf_path} to {png_path}")
+
+
 def main():
+    # Ensure output directory exists
+    output_dir = "labels"
+    os.makedirs(output_dir, exist_ok=True)
+
     # Read CSV
     df = pd.read_csv("data.csv")
     pdfmetrics.registerFont(TTFont('Mono', 'AtkinsonHyperlegibleMono-Regular.ttf'))
@@ -92,7 +104,8 @@ def main():
             messagebox.showwarning("No Selection", "Please select an asset tag.")
             return
         row = df[df["Asset Tag"].astype(str) == tag].iloc[0]
-        pdf_path = generate_label(row)
+        pdf_path = generate_label(row, output_dir)
+        pdf_to_png(pdf_path)
         messagebox.showinfo("Done", f"Generated {pdf_path}")
 
     tk.Button(root, text="Generate Label", command=on_generate).pack(padx=10, pady=10)
